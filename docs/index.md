@@ -13,5 +13,5 @@ The Workspace ONE Intelligence API documentation describes how to query and extr
 
 | Name | Link |
 | --- | --- |
-| API Documentation for VMware Workspace ONE Intelligence | [Download](guides/DHUB-APIDocumentationforVMwareWorkspaceONEIntelligence-230920-1721-3296.pdf){ .md-button .md-button--primary } |
-| API Documentation for VMware Workspace ONE Intelligence v2 | [Download](guides/DHUB-APIDocumentationforVMwareWorkspaceONEIntelligence-V2-150323-1201-60.pdf){ .md-button .md-button--primary } |
+| API Documentation for VMware Workspace ONE Intelligence | [Download](guides/DHUB-APIDocumentationforVMwareWorkspaceONEIntelligence-230920-1721-3296.pdf){ .md-button } |
+| API Documentation for VMware Workspace ONE Intelligence v2 | [Download](guides/DHUB-APIDocumentationforVMwareWorkspaceONEIntelligence-V2-150323-1201-60.pdf){ .md-button } |
