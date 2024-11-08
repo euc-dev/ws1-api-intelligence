@@ -1,6 +1,6 @@
 # ws1-api-intelligence
 
-This repo contains the documentation on using the available APIs in the Workspace ONE Intelligence platform.
+This repo contains the documentation on using the available APIs in the Omnissa Intelligence platform.
 
 This repo is structured to feed into the developer.omnissa.com Developer Portal via the [](https://github.com/euc-dev/euc-dev.github.io) repo using MkDocs published by GitHub Pages. All documentation should be created in MarkDown format with the capabilities of MkDocs and the Material theme in mind.Only pages within the `/docs` folder should be modified within this repo.
 
