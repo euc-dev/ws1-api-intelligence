@@ -14,4 +14,4 @@ The Omnissa Intelligence API documentation describes how to query and extract da
 
 | Name | Link |
 | --- | --- |
-| API Documentation for  Omnissa Intelligence V2 | [Download](./guides/DHUB-APIDocumentationforOmnissaIntelligence-V2-221124-172118.pdf){ .md-button } |
+| API Documentation for  Omnissa Intelligence V2 | [Download](./guides/DHUB-APIDocumentationforOmnissaIntelligence-V2-290425-233009.pdf){ .md-button } |
