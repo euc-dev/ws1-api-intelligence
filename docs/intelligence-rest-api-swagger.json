@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Omnissa Intelligence REST API",
-    "description": "The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.\n\nA limitation of V1 APIs was they didn't supporting joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 end-point requests and responses are fully qualified and are in the format...",
+    "description": "The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.\n\nA limitation of V1 APIs was they didn't support joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 endpoint requests and responses are fully qualified and are in the format <integration>.<entity>.<attribute_name>. For example: airwatch.application.app_name.",
     "version": "2.0"
   },
   "servers": [
@@ -1289,7 +1289,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116"
+            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116",
+            "description": "Report identifier."
           }
         ],
         "requestBody": {
@@ -1388,7 +1389,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "example": "416c1890-70d5-4261-a440-d2dc402e52cf"
+            "example": "416c1890-70d5-4261-a440-d2dc402e52cf",
+            "description": "Report tracking identifier from the Available downloads API results (\"id\" field)."
           }
         ],
         "responses": {
@@ -1430,7 +1432,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116"
+            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116",
+            "description": "Report identifier."
           }
         ],
         "requestBody": {
@@ -1695,7 +1698,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116"
+            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116",
+            "description": "Report identifier."
           }
         ],
         "requestBody": {
@@ -1777,7 +1781,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116"
+            "example": "5f2c2fa1-e9ec-4c55-9649-b3fbabf4d116",
+            "description": "Report identifier."
           }
         ],
         "responses": {
@@ -2478,10 +2483,12 @@
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/HistogramMetricsPayload"
+            "$ref": "#/components/schemas/HistogramMetricsPayload",
+            "description": "Histogram metrics request fields including sampling_interval."
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "JSON body uses a data object wrapping the histogram metrics payload (Histogram Requests)."
       },
       "RollingWindowMetricsRequestWrapper": {
         "type": "object",
@@ -2533,7 +2540,8 @@
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/EntityMetricsRequest"
+            "$ref": "#/components/schemas/EntityMetricsRequest",
+            "description": "Entity metrics fields as defined for Entity Metrics API (wrapped in data)."
           }
         },
         "additionalProperties": true
@@ -2709,10 +2717,12 @@
             "items": {
               "type": "object",
               "additionalProperties": true
-            }
+            },
+            "description": "Array of attribute metadata entries as described in Report Metadata API sample responses."
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "A meta-data API response listing attributes available for a particular integration and entity."
       },
       "ReportRecipient": {
         "type": "object",
@@ -3002,7 +3012,8 @@
             "$ref": "#/components/schemas/ReportDetail"
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Standard wrapper with data containing report details."
       },
       "ReportRunResponseWrapper": {
         "type": "object",
@@ -3012,7 +3023,8 @@
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Run report API response body including schedule-related fields for an ADHOC or scheduled run."
       },
       "CreateReportScheduleRequest": {
         "type": "object",
@@ -3350,7 +3362,8 @@
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Response includes schedule fields such as id (internal report schedule ID), active, created_at, cron_expression_detail, report_id, schedule_type, start."
       },
       "ReportDownloadRecord": {
         "type": "object",
@@ -3414,7 +3427,8 @@
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Lists downloads with paging; JSON body provides \"report tracking\" identifiers for completed runs available for download."
       },
       "ReportPreviewWrapper": {
         "type": "object",
@@ -3439,13 +3453,15 @@
                 "items": {
                   "type": "object",
                   "additionalProperties": true
-                }
+                },
+                "description": "Array of row objects with fully qualified column keys."
               }
             },
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Paged preview rows for a report (Report preview API)."
       },
       "ReportsSearchBody": {
         "type": "object",
@@ -3466,7 +3482,8 @@
             "description": "Optional sort specifications (field and ASC/DESC order)."
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Report search API JSON request body with paging and optional sort_ons."
       },
       "ReportsSearchWrapper": {
         "type": "object",
@@ -3497,7 +3514,8 @@
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Paged list of reports matching the search request."
       },
       "ReportRecipientsBody": {
         "type": "object",
@@ -3513,7 +3531,8 @@
             "description": "Recipients who should receive report output (email objects)."
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Set Report recipients API — specify recipients for a report."
       },
       "ReportRecipientsWrapper": {
         "type": "object",
@@ -3545,13 +3564,15 @@
                       "description": "Created by user identifier."
                     }
                   }
-                }
+                },
+                "description": "Recipients associated with the report."
               }
             },
             "additionalProperties": true
           }
         },
-        "additionalProperties": true
+        "additionalProperties": true,
+        "description": "Get Report recipients API response listing recipients for a report."
       }
     }
   }
