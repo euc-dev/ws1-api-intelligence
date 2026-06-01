@@ -146,4 +146,7 @@ markdown_extensions:
 
 # Navigation
 nav:
-  - index.md
+  - Overview: index.md
+  - Authentication: Authentication.md
+  - REST APIs: REST-APIs.md
+  - Sample responses: API-sample-responses.md

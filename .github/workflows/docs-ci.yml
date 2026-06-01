@@ -1,0 +1,38 @@
+name: Docs CI
+
+on:
+  push:
+    branches:
+      - main
+      - "task/**"
+  pull_request:
+    branches:
+      - main
+      - "task/**"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify OpenAPI report examples
+        run: python3 scripts/verify_openapi_report_examples.py
+
+      - name: Validate OpenAPI JSON
+        run: python3 -m json.tool docs/intelligence-rest-api-swagger.json > /dev/null
+
+      - name: Build MkDocs site
+        env:
+          CI: "true"
+        run: mkdocs build --strict -f mkdocs.yml

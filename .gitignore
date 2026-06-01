@@ -3,3 +3,8 @@
 **/.DS_Store
 site/*
 .site/*
+.venv/
+.venv-build/
+**/__pycache__/
+scripts/__pycache__/
+
