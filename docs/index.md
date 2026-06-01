@@ -9,6 +9,8 @@ hide:
 
 The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.
 
+The metadata and metrics APIs are not limited to Omnissa Intelligence SDK (formerly Apteligent) data. They can be used with supported Omnissa Intelligence integrations, including Workspace ONE UEM data where applicable.
+
 A limitation of V1 APIs was they didn't support joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 endpoint requests and responses are fully qualified and are in the format `<integration>.<entity>.<attribute_name>` (for example, `airwatch.application.app_name`).
 
 ## Documentation and reference

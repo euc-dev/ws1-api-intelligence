@@ -23,11 +23,11 @@
     },
     {
       "name": "Metadata",
-      "description": "Omnissa Intelligence SDK Apps Metrics Metadata APIs"
+      "description": "Omnissa Intelligence metadata APIs for supported integrations."
     },
     {
       "name": "Metrics",
-      "description": "Omnissa Intelligence SDK Apps Metrics APIs"
+      "description": "Omnissa Intelligence metrics APIs for supported integrations."
     },
     {
       "name": "Reports — metadata",
