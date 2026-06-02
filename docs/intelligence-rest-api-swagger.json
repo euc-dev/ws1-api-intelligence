@@ -50,7 +50,7 @@
           "Authentication"
         ],
         "summary": "Obtain access token",
-        "description": "Obtain a JSON Web Token using OAuth 2.0 client credentials.\n\nUse the token endpoint from the downloaded service account JSON. The documented flow uses `grant_type` in the query string and Basic authentication, where the username is the clientId and the password is the clientSecret. In Swagger UI, click `Authorize` and enter `clientId` as the username and `clientSecret` as the password for the `Service Account Client Credentials` security scheme, then call `/oauth/token`. After a successful response, copy the `access_token` value from the JSON response, click `Authorize` again, and paste that token into the Bearer auth input for the Intelligence APIs. This API call uses the `auth` prefix on the URI; other Intelligence APIs use the `api` prefix.",
+        "description": "Obtain a JSON Web Token using OAuth 2.0 client credentials.\n\nUse the token endpoint from the downloaded service account JSON. The documented flow uses `grant_type` in the query string and Basic authentication, where the username is the clientId and the password is the clientSecret. On the REST APIs page, use the token panel above Swagger UI to enter those service account credentials and automatically populate Bearer auth for the Intelligence APIs. This operation remains documented so the token exchange is visible in the OpenAPI definition. This API call uses the `auth` prefix on the URI; other Intelligence APIs use the `api` prefix.",
         "operationId": "postOauthToken",
         "servers": [
           {
@@ -63,12 +63,17 @@
             }
           }
         ],
-        "security": [
-          {
-            "serviceAccountClientCredentials": []
-          }
-        ],
+        "security": [],
         "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "HTTP Basic authentication header containing Base64(`clientId:clientSecret`)."
+          },
           {
             "name": "grant_type",
             "in": "query",
@@ -1957,16 +1962,11 @@
   },
   "components": {
     "securitySchemes": {
-      "serviceAccountClientCredentials": {
-        "type": "http",
-        "scheme": "basic",
-        "description": "Use Basic authentication with `clientId` as the username and `clientSecret` as the password. In Swagger UI, click `Authorize` and enter those service account credentials here before calling `/oauth/token`."
-      },
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "API calls to Omnissa Intelligence are always authenticated using a JSON Web Token (JWT). JWT tokens are submitted as Bearer tokens in an HTTP Authorization header. In Swagger UI, first call `/oauth/token`, then copy the returned `access_token` and paste it here in the Bearer auth input."
+        "description": "API calls to Omnissa Intelligence are always authenticated using a JSON Web Token (JWT). JWT tokens are submitted as Bearer tokens in an HTTP Authorization header. On the REST APIs page, you can fetch a token with the service account panel above Swagger UI or paste an existing JWT here directly."
       }
     },
     "responses": {
@@ -2050,7 +2050,7 @@
         "properties": {
           "access_token": {
             "type": "string",
-            "description": "Access token returned by the token endpoint. Copy this value and paste it into the Bearer auth input for subsequent Intelligence API calls."
+            "description": "Access token returned by the token endpoint. On the REST APIs page, the token panel uses this value to populate Bearer auth automatically for subsequent Intelligence API calls."
           },
           "expires_in": {
             "type": "integer",
