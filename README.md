@@ -6,6 +6,25 @@ This repo is structured to feed into the developer.omnissa.com Developer Portal 
 
 This folder will be integrated into the [developer portal repo](https://github.com/euc-dev/euc-dev.github.io) when built using a GitHub Action.
 
+## Developer portal aggregation
+
+To surface **Omnissa Intelligence APIs** at the same navigation level as **Omnissa Identity Service API** (and siblings), the parent portal repo must:
+
+1. Add this repository as a **git submodule** at an agreed path (for example `ws1-api-intelligence/`).
+2. Wire **MkDocs Monorepo** (or the portal’s supported include mechanism) so this site’s nav is merged under the APIs section, not under UAG.
+
+Example pattern with [mkdocs-monorepo-plugin](https://github.com/backstage/mkdocs-monorepo-plugin) in the parent `mkdocs.yml` (adjust submodule path and anchor title to match portal conventions):
+
+```yaml
+nav:
+  # ... other top-level sections ...
+  - APIs:
+      # ... other API products ...
+      - Omnissa Intelligence APIs: '!include ./ws1-api-intelligence/mkdocs.yml'
+```
+
+If the parent uses a different pattern (explicit nav duplication, CI that concatenates `nav`), mirror whatever **ws1-identity-services-api** uses for Identity Service.
+
 ## Downloads
 
 By downloading, installing, or using the Software, you agree to be bound by the terms of Omnissa’s Software Development Kit License Agreement unless there is a different license provided in or specifically referenced by the downloaded file or package. If you disagree with any terms of the agreement, then do not use the Software.
