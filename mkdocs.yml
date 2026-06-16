@@ -98,7 +98,7 @@ plugins:
 extra:
   homepage: https://omnissa.com
   # When true, show Authentication, REST APIs (Swagger/OpenAPI), and sample responses.
-  enable_swagger_openapi: false
+  enable_swagger_openapi: true
 
 hooks:
   - hooks/site_config.py
