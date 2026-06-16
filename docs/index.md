@@ -5,6 +5,8 @@ hide:
   - toc
 ---
 
+{% if enable_swagger_openapi %}
+
 ![Omnissa Intelligence](assets/logos/favicon-dark.svg){ align=right }
 
 The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.
@@ -155,3 +157,17 @@ Refer to **Table 1. API Call Limits Per Organization** in the PDF for Standard, 
 1. Follow **[Authentication](Authentication.md)** to configure a service account and retrieve tokens.
 2. Explore endpoints in **[REST APIs](REST-APIs.md)**.
 3. Compare payloads using **[Sample responses](API-sample-responses.md)**.
+
+{% else %}
+
+![Omnissa Intelligence](assets/logos/favicon-dark.svg){ align=right }
+
+The Omnissa Intelligence API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.
+
+## Documentation and Reference
+
+| Name | Link |
+| --- | --- |
+| API Documentation for Omnissa Intelligence V2 | [Download PDF](https://developer.omnissa.com/omnissa-intelligence-apis/guides/DHUB-APIDocumentationforOmnissaIntelligence-V2-130326-183145.pdf){ .md-button } |
+
+{% endif %}
