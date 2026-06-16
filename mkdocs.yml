@@ -97,11 +97,6 @@ plugins:
 # Customization
 extra:
   homepage: https://omnissa.com
-  # When true, show Authentication, REST APIs (Swagger/OpenAPI), and sample responses.
-  enable_swagger_openapi: true
-
-hooks:
-  - hooks/site_config.py
 
 extra_css:
   - assets/stylesheets/extra.css
@@ -150,6 +145,9 @@ markdown_extensions:
   - toc:
       permalink: true
 
-# Navigation (expanded by hooks/site_config.py when enable_swagger_openapi is true)
+# Navigation
 nav:
   - Overview: index.md
+  - Authentication: Authentication.md
+  - REST APIs: REST-APIs.md
+  - Sample responses: API-sample-responses.md
