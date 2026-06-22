@@ -97,11 +97,6 @@ plugins:
 # Customization
 extra:
   homepage: https://omnissa.com
-  # When true, show Authentication, REST APIs (Swagger/OpenAPI), and sample responses.
-  enable_swagger_openapi: false
-
-hooks:
-  - hooks/site_config.py
 
 extra_css:
   - assets/stylesheets/extra.css
@@ -112,7 +107,6 @@ extra_css:
 extra_javascript:
   - assets/javascripts/tablesort.min.js #https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
   - assets/javascripts/tablesort.js
-  - assets/javascripts/swagger-token-bridge.js
 
 # Extensions
 markdown_extensions:
@@ -150,6 +144,9 @@ markdown_extensions:
   - toc:
       permalink: true
 
-# Navigation (expanded by hooks/site_config.py when enable_swagger_openapi is true)
+# Navigation
 nav:
   - Overview: index.md
+  - Authentication: Authentication.md
+  - REST APIs: REST-APIs.md
+  - Sample responses: API-sample-responses.md
