@@ -18,10 +18,6 @@
   ],
   "tags": [
     {
-      "name": "Authentication",
-      "description": "Obtain a JSON Web Token (JWT) using OAuth 2.0 client credentials."
-    },
-    {
       "name": "Metadata",
       "description": "Omnissa Intelligence metadata APIs for supported integrations."
     },
@@ -44,88 +40,6 @@
     }
   ],
   "paths": {
-    "/oauth/token": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Obtain access token",
-        "description": "Obtain a JSON Web Token using OAuth 2.0 client credentials.\n\nUse the token endpoint from the downloaded service account JSON. The documented flow uses `grant_type` in the query string and Basic authentication, where the username is the clientId and the password is the clientSecret. On the REST APIs page, use the token panel above Swagger UI to enter those service account credentials and automatically populate Bearer auth for the Intelligence APIs. This operation remains documented so the token exchange is visible in the OpenAPI definition. This API call uses the `auth` prefix on the URI; other Intelligence APIs use the `api` prefix.",
-        "operationId": "postOauthToken",
-        "servers": [
-          {
-            "url": "https://auth.{region}.data.workspaceone.com",
-            "variables": {
-              "region": {
-                "default": "sandbox",
-                "description": "Use the host name specific to the region or environment in which your data resides."
-              }
-            }
-          }
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "HTTP Basic authentication header containing Base64(`clientId:clientSecret`)."
-          },
-          {
-            "name": "grant_type",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "client_credentials"
-              ]
-            },
-            "description": "OAuth 2.0 grant type."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Access token response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                },
-                "examples": {
-                  "sampleResponse": {
-                    "summary": "Sample Response",
-                    "value": {
-                      "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.<payload-and-signature-truncated>",
-                      "expires_in": 3599,
-                      "iss": "https://auth.{your-environment}",
-                      "jti": "a3a990fb-b5f8-4ed9-afc0-4a671dd5758b",
-                      "nbf": 1559613306,
-                      "scope": "dpa.example.scope.one dpa.example.scope.two",
-                      "token_type": "bearer",
-                      "dpa.org_id": "538f619e-2db4-4f07-974b-efb3e5326116"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication failed.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v2/metadata/entities": {
       "post": {
         "tags": [
@@ -1966,7 +1880,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "API calls to Omnissa Intelligence are always authenticated using a JSON Web Token (JWT). JWT tokens are submitted as Bearer tokens in an HTTP Authorization header. On the REST APIs page, you can fetch a token with the service account panel above Swagger UI or paste an existing JWT here directly."
+        "description": "API calls to Omnissa Intelligence are always authenticated using a JSON Web Token (JWT). JWT tokens are submitted as Bearer tokens in an HTTP Authorization header. Paste an existing JWT here, or obtain one using the steps on the Authentication documentation page."
       }
     },
     "responses": {
@@ -2044,44 +1958,6 @@
             "description": "Errors is an array with code, message, and violated_property fields."
           }
         }
-      },
-      "TokenResponse": {
-        "type": "object",
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "description": "Access token returned by the token endpoint. On the REST APIs page, the token panel uses this value to populate Bearer auth automatically for subsequent Intelligence API calls."
-          },
-          "expires_in": {
-            "type": "integer",
-            "description": "Number of seconds until the token expires."
-          },
-          "iss": {
-            "type": "string",
-            "description": "Issuer."
-          },
-          "jti": {
-            "type": "string",
-            "description": "Token identifier."
-          },
-          "nbf": {
-            "type": "integer",
-            "description": "Not valid before time."
-          },
-          "scope": {
-            "type": "string",
-            "description": "Scopes granted to the token."
-          },
-          "token_type": {
-            "type": "string",
-            "description": "Token type."
-          },
-          "dpa.org_id": {
-            "type": "string",
-            "description": "Organization identifier."
-          }
-        },
-        "additionalProperties": true
       },
       "SortOn": {
         "type": "object",
