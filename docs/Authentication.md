@@ -108,9 +108,7 @@ Successful responses include an access token and related fields. Below is an ill
 }
 ```
 
-The access_token in the response can be used to call Omnissa Intelligence APIs.
-
-On the **[REST APIs](REST-APIs.md)** page, the token panel above Swagger UI can use these service account credentials to fetch an access token and automatically populate Swagger's Bearer authorization for the Intelligence APIs. If the browser cannot call the auth endpoint because of CORS or network restrictions, obtain the token outside Swagger UI and paste the returned `access_token` into Swagger's Bearer auth input manually.
+The access_token in the response can be used to call Omnissa Intelligence APIs. When exploring endpoints on **[REST APIs](REST-APIs.md)**, paste the returned `access_token` into Swagger's **Authorize** button.
 
 ---
 
