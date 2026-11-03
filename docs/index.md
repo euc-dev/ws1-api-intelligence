@@ -11,6 +11,8 @@ The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentat
 
 The metadata and metrics APIs are not limited to Omnissa Intelligence SDK (formerly Apteligent) data. They can be used with supported Omnissa Intelligence integrations, including Workspace ONE UEM data where applicable.
 
+Quickflow APIs support discovery (search), execution against a bounded set of targets (up to 100), and execution status monitoring (overall and per-target). See **[REST APIs](REST-APIs.md)** and **[Sample responses](API-sample-responses.md)**.
+
 A limitation of V1 APIs was they didn't support joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 endpoint requests and responses are fully qualified and are in the format `<integration>.<entity>.<attribute_name>` (for example, `airwatch.application.app_name`).
 
 ## Documentation and reference

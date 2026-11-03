@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Omnissa Intelligence REST API",
-    "description": "The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.\n\nA limitation of V1 APIs was they didn't support joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 endpoint requests and responses are fully qualified and are in the format <integration>.<entity>.<attribute_name>. For example: airwatch.application.app_name.",
+    "description": "The Omnissa Intelligence (formerly Workspace ONE Intelligence) V2 API documentation describes how to query and extract data for use in other business intelligence tools. It also helps with building General Data Protection Regulation (GDPR) compliant tools and applications with REST APIs.\n\nA limitation of V1 APIs was they didn't support joining multiple entities. V2 APIs for reports now support JOINS. Attribute names in V2 endpoint requests and responses are fully qualified and are in the format <integration>.<entity>.<attribute_name>. For example: airwatch.application.app_name. Quickflow APIs support discovery (search), execution against a bounded set of targets (up to 100), and execution status monitoring (overall and per-target).",
     "version": "2.0"
   },
   "servers": [
@@ -32,6 +32,10 @@
     {
       "name": "Reports",
       "description": "Omnissa Intelligence Reports APIs"
+    },
+    {
+      "name": "Quickflows",
+      "description": "Discover, execute, and monitor Quickflow automations. Search and execute use the automations V2 endpoints; status APIs are Quickflow-specific."
     }
   ],
   "security": [
@@ -1872,6 +1876,503 @@
           }
         }
       }
+    },
+    "/v2/automations/search": {
+      "post": {
+        "tags": [
+          "Quickflows"
+        ],
+        "summary": "Search Quickflows (Automations search)",
+        "description": "Paginated search for automations. For Quickflow discovery, filter or search with category QUICKFLOWS. Supports free-text search_terms on name, description, created_by, source_object_id, categories, and evaluation_type; exact-match filtering on integration, target_entity, active, and source_object_type; and optional action_template_ids. Matching is always case-insensitive. Results include rule metadata and workflow actions.",
+        "operationId": "postAutomationsSearch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationSearchRequest"
+              },
+              "examples": {
+                "quickflows": {
+                  "summary": "Search Quickflows by category",
+                  "value": {
+                    "page_size": 100,
+                    "offset": 0,
+                    "sort_ons": [
+                      {
+                        "field": "name",
+                        "order": "ASC"
+                      }
+                    ],
+                    "ignore_case": true,
+                    "search_terms": [
+                      {
+                        "value": "QUICKFLOWS",
+                        "fields": [
+                          "categories"
+                        ],
+                        "operator": "CONTAINS"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paged list of automations matching the search request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationSearchWrapper"
+                },
+                "examples": {
+                  "sampleResponse": {
+                    "summary": "Sample Response",
+                    "value": {
+                      "data": {
+                        "page_size": 100,
+                        "offset": 0,
+                        "total_count": 1,
+                        "results": [
+                          {
+                            "id": "12345678-0000-0000-0000-000000000102",
+                            "name": "Restart print spooler",
+                            "description": "Stops and starts the print spooler service",
+                            "integration": "airwatch",
+                            "target_entity": "device",
+                            "evaluation_type": "CUSTOM_TARGET",
+                            "active": true,
+                            "read_only": false,
+                            "valid_for_activation": true,
+                            "created_at": "2024-08-01T16:55:55.143Z",
+                            "created_by_details": {
+                              "id": "22345678-0000-0000-0000-000000000001",
+                              "display_name": "api-service-account",
+                              "UserName": "api-service-account"
+                            },
+                            "modified_at": "2024-08-01T16:55:55.143Z",
+                            "categories": [
+                              "QUICKFLOWS"
+                            ],
+                            "actions": [
+                              {
+                                "action_data": {
+                                  "type": "OPENAPI",
+                                  "action_template_id": "44444444-0000-0000-0000-000000000001",
+                                  "connector_config_id": "33333333-0000-0000-0000-000000000001",
+                                  "data_by_section": {
+                                    "SYSTEM": {
+                                      "action_id": "aeb7e1ee-e450-4312-8f96-d6c304375c29"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Authorization failed. You attempted to access a resource or perform an operation that you are not permitted to do.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/automations/execute": {
+      "post": {
+        "tags": [
+          "Quickflows"
+        ],
+        "summary": "Execute Quickflow",
+        "description": "Dispatches a Quickflow for execution. Provide rule_id and custom_target_execution_request with target_field_set_id (the configured targeting scheme for the datasource) and targets (up to 100). Each target is a map of field name to value (single attribute such as a device GUID, or a composite of multiple fields). Optional external_context_id correlates the run to an external system (for example a ServiceNow incident). Returns execution_id for status polling. Successful dispatch returns HTTP 202 Accepted with execution_id.",
+        "operationId": "postAutomationsExecute",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuickflowExecuteRequest"
+              },
+              "examples": {
+                "sample": {
+                  "summary": "Execute against device GUIDs",
+                  "value": {
+                    "rule_id": "12345678-0000-0000-0000-000000000102",
+                    "external_context_id": "snow-1234",
+                    "custom_target_execution_request": {
+                      "target_field_set_id": "airwatch_device_identity",
+                      "targets": [
+                        {
+                          "_airwatch_device_guid": "11111111-0000-0000-0000-000000000000"
+                        },
+                        {
+                          "_airwatch_device_guid": "11111111-0000-0000-0000-000000000001"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Quickflow accepted for execution. Response includes execution_id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuickflowExecuteWrapper"
+                },
+                "examples": {
+                  "sampleResponse": {
+                    "summary": "Sample Response",
+                    "value": {
+                      "data": {
+                        "execution_id": "12345678-0000-0000-0000-000000000201"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Authorization failed. You attempted to access a resource or perform an operation that you are not permitted to do.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quickflows/{rule_id}/execution/{execution_id}/status": {
+      "get": {
+        "tags": [
+          "Quickflows"
+        ],
+        "summary": "Get Quickflow execution status overview",
+        "description": "Returns overall Quickflow execution metadata and the current status of every target. Applies to Quickflow executions only. Requests against a manual or scheduled (non-Quickflow) execution return HTTP 400 with error code EXECUTION-NOT-A-QUICKFLOW. Status values: IN_PROGRESS, COMPLETED, FAILED. Caller inputs that resolved to zero entities are reported as NOT_FOUND with target_id null (target_key_values still echo the caller-supplied identifying fields). target_id is system-generated for resolved targets; target_key_values echo the identifying field values so you can correlate overview rows to Execute inputs. Depending on the datasource configuration, a single Execute input can resolve to more or fewer targets than were supplied. Use targets[].target_id with the per-target status API for action-level detail.",
+        "operationId": "getQuickflowExecutionStatusOverview",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Quickflow (rule) identifier."
+          },
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Execution identifier returned by the Execute API."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Execution overview with per-target statuses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuickflowExecutionStatusOverviewWrapper"
+                },
+                "examples": {
+                  "sampleResponse": {
+                    "summary": "Sample Response",
+                    "value": {
+                      "data": {
+                        "quickflow_id": "12345678-0000-0000-0000-000000000102",
+                        "quickflow_name": "Restart print spooler",
+                        "execution_id": "12345678-0000-0000-0000-000000000001",
+                        "executed_by_name": "John Doe",
+                        "external_context_id": "snow-1234",
+                        "target_field_set_id": "airwatch_device_identity",
+                        "execution_complete": true,
+                        "targets": [
+                          {
+                            "target_id": "abc45678-0000-0000-0000-000000000001",
+                            "target_key_values": {
+                              "_airwatch_device_guid": "11111111-0000-0000-0000-000000000001"
+                            },
+                            "status": "COMPLETED"
+                          },
+                          {
+                            "target_id": "abc45678-0000-0000-0000-000000000002",
+                            "target_key_values": {
+                              "_airwatch_device_guid": "11111111-0000-0000-0000-000000000002"
+                            },
+                            "status": "FAILED"
+                          },
+                          {
+                            "target_key_values": {
+                              "_airwatch_device_guid": "11111111-0000-0000-0000-000000000099"
+                            },
+                            "status": "NOT_FOUND",
+                            "target_id": null
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. For example, the execution is not a Quickflow execution (error code EXECUTION-NOT-A-QUICKFLOW).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notAQuickflow": {
+                    "summary": "Non-Quickflow execution",
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "EXECUTION-NOT-A-QUICKFLOW",
+                          "message": "Execution is not a quickflow execution."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Authorization failed. You attempted to access a resource or perform an operation that you are not permitted to do.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quickflows/{rule_id}/execution/{execution_id}/target/{target_id}/status": {
+      "get": {
+        "tags": [
+          "Quickflows"
+        ],
+        "summary": "Get Quickflow target execution status",
+        "description": "Returns detailed per-action execution status for a single target. target_id must be the value from the overview API targets[].target_id (not applicable to NOT_FOUND overview rows, where target_id is null). For each unique workflow action (action_id), only the latest status is returned. Action statuses use the same public vocabulary as the overview API: IN_PROGRESS, COMPLETED, FAILED. additional_metadata is an optional string-to-string map (for example http_status). Requests against a manual or scheduled (non-Quickflow) execution return HTTP 400 with error code EXECUTION-NOT-A-QUICKFLOW.",
+        "operationId": "getQuickflowExecutionTargetStatus",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Quickflow (rule) identifier."
+          },
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Execution identifier returned by the Execute API."
+          },
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Target identifier from the overview API targets[].target_id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-target action execution details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuickflowExecutionTargetStatusWrapper"
+                },
+                "examples": {
+                  "sampleResponse": {
+                    "summary": "Sample Response",
+                    "value": {
+                      "data": {
+                        "quickflow_id": "12345678-0000-0000-0000-000000000102",
+                        "quickflow_name": "Restart print spooler",
+                        "execution_id": "12345678-0000-0000-0000-000000000001",
+                        "executed_by_name": "John Doe",
+                        "external_context_id": "snow-1234",
+                        "target_id": "abc45678-0000-0000-0000-000000000001",
+                        "action_execution_details": [
+                          {
+                            "action_friendly_name": "Stop spooler",
+                            "action_id": "12345678-0000-0000-0000-000000000005",
+                            "event_timestamp": "127357",
+                            "status": "COMPLETED",
+                            "additional_metadata": {
+                              "http_status": "200"
+                            }
+                          },
+                          {
+                            "action_friendly_name": "Start spooler",
+                            "action_id": "12345678-0000-0000-0000-000000000006",
+                            "event_timestamp": "127358",
+                            "status": "FAILED",
+                            "additional_metadata": {
+                              "details": "",
+                              "faults": "abcd",
+                              "http_status": "400"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. For example, the execution is not a Quickflow execution (error code EXECUTION-NOT-A-QUICKFLOW).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notAQuickflow": {
+                    "summary": "Non-Quickflow execution",
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "EXECUTION-NOT-A-QUICKFLOW",
+                          "message": "Execution is not a quickflow execution."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Authorization failed. You attempted to access a resource or perform an operation that you are not permitted to do.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3449,6 +3950,358 @@
         },
         "additionalProperties": true,
         "description": "Get Report recipients API response listing recipients for a report."
+      },
+      "AutomationSearchRequest": {
+        "type": "object",
+        "properties": {
+          "page_size": {
+            "type": "integer",
+            "description": "Number of records to return (paging)."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset across the entire data set at which the current page starts."
+          },
+          "sort_ons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortOn"
+            },
+            "description": "Optional sort specifications (field and ASC/DESC order)."
+          },
+          "ignore_case": {
+            "type": "boolean",
+            "description": "Search matching is always case-insensitive. This field is accepted for request compatibility and defaults to true; callers cannot enable case-sensitive matching."
+          },
+          "search_terms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchTerm"
+            },
+            "description": "Free-text search terms. Supported fields include name, description, created_by, source_object_id, categories, and evaluation_type. Use categories with value QUICKFLOWS to discover Quickflows."
+          },
+          "filter": {
+            "type": "string",
+            "description": "Optional exact-match filter expression. Supported attributes include integration, target_entity, active, and source_object_type."
+          },
+          "action_template_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Optional filter by action template IDs used in the Quickflow workflow."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Paginated search request for automations / Quickflows."
+      },
+      "AutomationSearchResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Automation / Quickflow rule identifier."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "integration": {
+            "type": "string"
+          },
+          "target_entity": {
+            "type": "string"
+          },
+          "evaluation_type": {
+            "type": "string",
+            "description": "For Quickflows, CUSTOM_TARGET."
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Includes QUICKFLOWS for Quickflow automations."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "Workflow actions associated with the automation."
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "modified_at": {
+            "type": "string"
+          },
+          "created_by_details": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true,
+        "description": "Automation summary including workflow actions."
+      },
+      "AutomationSearchWrapper": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "page_size": {
+                "type": "integer"
+              },
+              "offset": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AutomationSearchResult"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true,
+        "description": "Paged automation / Quickflow search results."
+      },
+      "CustomTargetExecutionRequest": {
+        "type": "object",
+        "required": [
+          "target_field_set_id",
+          "targets"
+        ],
+        "properties": {
+          "target_field_set_id": {
+            "type": "string",
+            "description": "Configured targeting scheme for the datasource (for example airwatch_device_identity)."
+          },
+          "targets": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Map of field name to value identifying one target."
+            },
+            "description": "Targets to execute against. Maximum 100 per request."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Custom target selection for Quickflow execution."
+      },
+      "QuickflowExecuteRequest": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "custom_target_execution_request"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Quickflow (rule) identifier."
+          },
+          "external_context_id": {
+            "type": "string",
+            "description": "Optional correlation id for an external system (for example a ServiceNow incident)."
+          },
+          "custom_target_execution_request": {
+            "$ref": "#/components/schemas/CustomTargetExecutionRequest"
+          }
+        },
+        "additionalProperties": true,
+        "description": "Request body for executing a Quickflow."
+      },
+      "QuickflowExecuteWrapper": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "execution_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Identifier for polling execution status."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true,
+        "description": "Accepted execution response."
+      },
+      "QuickflowTargetStatus": {
+        "type": "string",
+        "enum": [
+          "IN_PROGRESS",
+          "COMPLETED",
+          "FAILED",
+          "NOT_FOUND"
+        ],
+        "description": "Public status of a target within a Quickflow execution."
+      },
+      "QuickflowActionStatus": {
+        "type": "string",
+        "enum": [
+          "IN_PROGRESS",
+          "COMPLETED",
+          "FAILED"
+        ],
+        "description": "Public status of a workflow action within a target execution."
+      },
+      "QuickflowOverviewTarget": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "description": "System-generated target id for resolved targets. Null when status is NOT_FOUND (RulesHistorical never generated an id for that input).",
+            "nullable": true
+          },
+          "target_key_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Identifying field values for this target, echoed from the Execute request (same keys/values the caller supplied, for correlation). When status is NOT_FOUND, target_id is null."
+          },
+          "status": {
+            "$ref": "#/components/schemas/QuickflowTargetStatus"
+          }
+        },
+        "additionalProperties": true,
+        "description": "Per-target row in the overview. Resolved targets include a non-null target_id. NOT_FOUND rows have target_id null and echo the unmatched Execute input in target_key_values. A single Execute input may resolve to more or fewer overview rows than were supplied."
+      },
+      "QuickflowExecutionStatusOverview": {
+        "type": "object",
+        "properties": {
+          "quickflow_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quickflow_name": {
+            "type": "string"
+          },
+          "execution_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executed_by_name": {
+            "type": "string"
+          },
+          "external_context_id": {
+            "type": "string"
+          },
+          "target_field_set_id": {
+            "type": "string"
+          },
+          "execution_complete": {
+            "type": "boolean"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuickflowOverviewTarget"
+            }
+          }
+        },
+        "additionalProperties": true,
+        "description": "Overall Quickflow execution status and per-target results."
+      },
+      "QuickflowExecutionStatusOverviewWrapper": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/QuickflowExecutionStatusOverview"
+          }
+        },
+        "additionalProperties": true
+      },
+      "QuickflowActionExecutionDetail": {
+        "type": "object",
+        "properties": {
+          "action_friendly_name": {
+            "type": "string"
+          },
+          "action_id": {
+            "type": "string"
+          },
+          "event_timestamp": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QuickflowActionStatus"
+          },
+          "additional_metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Optional string-to-string action outcome details (for example http_status)."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Latest status for one unique workflow action (action_id) within the target execution."
+      },
+      "QuickflowExecutionTargetStatus": {
+        "type": "object",
+        "properties": {
+          "quickflow_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quickflow_name": {
+            "type": "string"
+          },
+          "execution_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executed_by_name": {
+            "type": "string"
+          },
+          "external_context_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "action_execution_details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuickflowActionExecutionDetail"
+            },
+            "description": "Latest status per unique action_id in the Quickflow workflow for this target."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Per-target action execution details for a Quickflow run."
+      },
+      "QuickflowExecutionTargetStatusWrapper": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/QuickflowExecutionTargetStatus"
+          }
+        },
+        "additionalProperties": true
       }
     }
   }

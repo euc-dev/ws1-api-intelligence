@@ -678,3 +678,210 @@ HTTP **200 OK** with `Content-Type: application/octet-stream` and the report byt
 ### Get report recipients — sample response (`GET /v2/reports/{id}/recipients`)
 
 Same JSON shape as **Set report recipients** above (the PDF illustrates `GET` returning the stored recipients list).
+
+---
+
+## Quickflows
+
+Discover Quickflows with automations search, execute against up to **100** targets, then poll execution status. Authenticate with a JWT bearer token as described in **[Authentication](Authentication.md)**. Interactive reference: **[REST APIs](REST-APIs.md)**.
+
+Optional `external_context_id` on execute correlates the run to an external system (for example a ServiceNow incident). Successful execute returns **HTTP 202** with `execution_id`.
+
+Search matching is always case-insensitive (`ignore_case` defaults to true and cannot enable case-sensitive matching).
+
+Status overview and per-target detail apply to Quickflow executions only. Calling either status API for a manual or scheduled (non-Quickflow) execution returns **HTTP 400** with error code `EXECUTION-NOT-A-QUICKFLOW`.
+
+Public target/action statuses are `IN_PROGRESS`, `COMPLETED`, and `FAILED`. Overview may also return `NOT_FOUND` when a caller-supplied target resolved to zero entities (`target_id` is `null`; `target_key_values` still echoes the unmatched input). Use `target_key_values` to correlate overview rows to Execute inputs — a single input can resolve to more or fewer targets than were supplied. For each unique workflow action (`action_id`), the target-status API returns only the latest status.
+
+### Search Quickflows — sample request (`POST /v2/automations/search`)
+
+```json
+{
+  "page_size": 100,
+  "offset": 0,
+  "sort_ons": [
+    {
+      "field": "name",
+      "order": "ASC"
+    }
+  ],
+  "ignore_case": true,
+  "search_terms": [
+    {
+      "value": "QUICKFLOWS",
+      "fields": ["categories"],
+      "operator": "CONTAINS"
+    }
+  ]
+}
+```
+
+### Search Quickflows — sample response (`POST /v2/automations/search`)
+
+```json
+{
+  "data": {
+    "page_size": 100,
+    "offset": 0,
+    "total_count": 1,
+    "results": [
+      {
+        "id": "12345678-0000-0000-0000-000000000102",
+        "name": "Restart print spooler",
+        "description": "Stops and starts the print spooler service",
+        "integration": "airwatch",
+        "target_entity": "device",
+        "evaluation_type": "CUSTOM_TARGET",
+        "active": true,
+        "read_only": false,
+        "valid_for_activation": true,
+        "created_at": "2024-08-01T16:55:55.143Z",
+        "created_by_details": {
+          "id": "22345678-0000-0000-0000-000000000001",
+          "display_name": "api-service-account",
+          "UserName": "api-service-account"
+        },
+        "modified_at": "2024-08-01T16:55:55.143Z",
+        "categories": ["QUICKFLOWS"],
+        "actions": [
+          {
+            "action_data": {
+              "type": "OPENAPI",
+              "action_template_id": "44444444-0000-0000-0000-000000000001",
+              "connector_config_id": "33333333-0000-0000-0000-000000000001",
+              "data_by_section": {
+                "SYSTEM": {
+                  "action_id": "aeb7e1ee-e450-4312-8f96-d6c304375c29"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Execute Quickflow — sample request (`POST /v2/automations/execute`)
+
+```json
+{
+  "rule_id": "12345678-0000-0000-0000-000000000102",
+  "external_context_id": "snow-1234",
+  "custom_target_execution_request": {
+    "target_field_set_id": "airwatch_device_identity",
+    "targets": [
+      {
+        "_airwatch_device_guid": "11111111-0000-0000-0000-000000000000"
+      },
+      {
+        "_airwatch_device_guid": "11111111-0000-0000-0000-000000000001"
+      }
+    ]
+  }
+}
+```
+
+### Execute Quickflow — sample response (`POST /v2/automations/execute`, HTTP 202)
+
+```json
+{
+  "data": {
+    "execution_id": "12345678-0000-0000-0000-000000000201"
+  }
+}
+```
+
+### Execution status overview — sample response (`GET /v1/quickflows/{rule_id}/execution/{execution_id}/status`)
+
+`target_key_values` echoes the identifying fields from the Execute request (same keys as `custom_target_execution_request.targets`). The third row below is an unmatched input (`NOT_FOUND` with `target_id` null).
+
+```json
+{
+  "data": {
+    "quickflow_id": "12345678-0000-0000-0000-000000000102",
+    "quickflow_name": "Restart print spooler",
+    "execution_id": "12345678-0000-0000-0000-000000000001",
+    "executed_by_name": "John Doe",
+    "external_context_id": "snow-1234",
+    "target_field_set_id": "airwatch_device_identity",
+    "execution_complete": true,
+    "targets": [
+      {
+        "target_id": "abc45678-0000-0000-0000-000000000001",
+        "target_key_values": {
+          "_airwatch_device_guid": "11111111-0000-0000-0000-000000000001"
+        },
+        "status": "COMPLETED"
+      },
+      {
+        "target_id": "abc45678-0000-0000-0000-000000000002",
+        "target_key_values": {
+          "_airwatch_device_guid": "11111111-0000-0000-0000-000000000002"
+        },
+        "status": "FAILED"
+      },
+      {
+        "target_id": null,
+        "target_key_values": {
+          "_airwatch_device_guid": "11111111-0000-0000-0000-000000000099"
+        },
+        "status": "NOT_FOUND"
+      }
+    ]
+  }
+}
+```
+
+### Non-Quickflow execution — sample error (`GET` status APIs, HTTP 400)
+
+```json
+{
+  "errors": [
+    {
+      "code": "EXECUTION-NOT-A-QUICKFLOW",
+      "message": "Execution is not a quickflow execution."
+    }
+  ]
+}
+```
+
+### Target execution status — sample response (`GET /v1/quickflows/{rule_id}/execution/{execution_id}/target/{target_id}/status`)
+
+Use a non-null `targets[].target_id` from the overview response (`NOT_FOUND` rows have `target_id` null and cannot be used here). `action_execution_details` contains the latest status for each unique `action_id`.
+
+```json
+{
+  "data": {
+    "quickflow_id": "12345678-0000-0000-0000-000000000102",
+    "quickflow_name": "Restart print spooler",
+    "execution_id": "12345678-0000-0000-0000-000000000001",
+    "executed_by_name": "John Doe",
+    "external_context_id": "snow-1234",
+    "target_id": "abc45678-0000-0000-0000-000000000001",
+    "action_execution_details": [
+      {
+        "action_friendly_name": "Stop spooler",
+        "action_id": "12345678-0000-0000-0000-000000000005",
+        "event_timestamp": "127357",
+        "status": "COMPLETED",
+        "additional_metadata": {
+          "http_status": "200"
+        }
+      },
+      {
+        "action_friendly_name": "Start spooler",
+        "action_id": "12345678-0000-0000-0000-000000000006",
+        "event_timestamp": "127358",
+        "status": "FAILED",
+        "additional_metadata": {
+          "details": "",
+          "faults": "abcd",
+          "http_status": "400"
+        }
+      }
+    ]
+  }
+}
+```
